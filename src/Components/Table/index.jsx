@@ -3,7 +3,6 @@ import MaterialTable from "material-table";
 import PropTypes from "prop-types";
 
 const Table = ({ data }) => {
-  console.log(data);
   return (
     <div style={{ maxWidth: "100%" }}>
       <MaterialTable
@@ -22,7 +21,7 @@ const Table = ({ data }) => {
 };
 
 Table.propTypes = {
-  data: PropTypes.object
+  data: PropTypes.array
 };
 
 export default Table;

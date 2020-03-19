@@ -6,8 +6,9 @@ import { getProfileUrl, getReposUrl } from "Utils/constants";
 export const initialState = {
   repos: [],
   profile: {},
-  fetching: false,
-  error: ""
+  isFetching: false,
+  errorStatus: null,
+  showData: false
 };
 
 const candidateSlice = createSlice({
@@ -15,20 +16,29 @@ const candidateSlice = createSlice({
   initialState,
   reducers: {
     requestInProgress(state) {
-      state.fetching = true;
+      state.isFetching = true;
+      state.errorStatus = null;
     },
     fetchCandidateInfoSuccess(state, action) {
       state.repos = action.payload.repoData;
       state.profile = action.payload.profileData;
-      state.fetching = true;
+      state.isFetching = false;
+      state.showData = true;
     },
     fetchCandidateInfoError(state, action) {
-      state.error = action.payload;
-      state.fetching = false;
+      state.errorStatus = action.payload;
+      state.isFetching = false;
     },
     setExtraCandidateData(state, action) {
       const { email, birthdate } = action.payload;
       state.profile = { ...state.profile, email, birthdate };
+    },
+    resetCandidateData(state) {
+      state.repos = [];
+      state.profile = {};
+      state.isFetching = false;
+      state.errorStatus = null;
+      state.showData = false;
     }
   }
 });
@@ -37,7 +47,8 @@ export const {
   requestInProgress,
   fetchCandidateInfoSuccess,
   fetchCandidateInfoError,
-  setExtraCandidateData
+  setExtraCandidateData,
+  resetCandidateData
 } = candidateSlice.actions;
 
 export function fetchCandidateInfo(username) {
@@ -56,7 +67,11 @@ export function fetchCandidateInfo(username) {
         );
       })
       .catch(err => {
-        dispatch(fetchCandidateInfoError(err.toString()));
+        if (err.response) {
+          dispatch(fetchCandidateInfoError(err.response.status));
+        } else {
+          dispatch(fetchCandidateInfoError(0));
+        }
         throw err;
       });
   };

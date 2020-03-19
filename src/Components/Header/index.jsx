@@ -6,7 +6,7 @@ import "./Header.scss";
 const Header = () => {
   return (
     <div className="header">
-      <Typography className="header__title">Git4N</Typography>
+      <Typography className="header__title">Technical Test</Typography>
     </div>
   );
 };

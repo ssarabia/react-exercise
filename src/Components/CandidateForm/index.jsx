@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { TextField } from "@material-ui/core";
+import { TextField, Button } from "@material-ui/core";
+import Alert from "@material-ui/lab/Alert";
 import { useDispatch } from "react-redux";
 import DateFnsUtils from "@date-io/date-fns";
 import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import { CandidateSchema } from "Utils/validationSchemas";
+import PropTypes from "prop-types";
 
 import {
   fetchCandidateInfo,
-  setExtraCandidateData
+  setExtraCandidateData,
+  resetCandidateData
 } from "Slices/Candidate/candidate.slice";
+import "./CandidateForm.scss";
 
-const CandidateForm = () => {
+const CandidateForm = ({ requestErrorStatus }) => {
   const { register, handleSubmit, errors, setValue, reset } = useForm({
     validationSchema: CandidateSchema
   });
@@ -39,15 +43,20 @@ const CandidateForm = () => {
           birthdate: dateFns.format(data.birthdate, "MM/dd/yyyy")
         })
       );
-      localStorage.setItem("profile", JSON.stringify(data));
       reset();
       setBirthDate(new Date());
     });
   };
 
+  const handleReset = () => {
+    dispatch(resetCandidateData());
+    reset();
+    setBirthDate(new Date());
+  };
+
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} className="candidate-form">
         <TextField
           variant="outlined"
           className="candidate-search__input"
@@ -111,10 +120,33 @@ const CandidateForm = () => {
           error={!!errors.username}
           helperText={errors.username ? errors.username.message : ""}
         />
-        <input type="submit" />
+        {requestErrorStatus !== null && (
+          <Alert severity="error" className="candidate-form__alert">
+            {requestErrorStatus === 404 ? "User Not Found" : "Unexpected Error"}
+          </Alert>
+        )}
+        <Button
+          variant="contained"
+          color="primary"
+          type="submit"
+          className="candidate-form__button"
+        >
+          Submit
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleReset}
+          className="candidate-form__button"
+        >
+          Reset
+        </Button>
       </form>
     </MuiPickersUtilsProvider>
   );
+};
+
+CandidateForm.propTypes = {
+  requestErrorStatus: PropTypes.number
 };
 
 export default CandidateForm;
